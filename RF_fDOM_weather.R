@@ -1,6 +1,7 @@
 library(lubridate)
 
-dir <- "~/Documents/intoDBP/training_fdom/"
+case_study <- "sau"
+dir <- paste0("~/Documents/intoDBP/training_fdom/",case_study, "/")
 #load drivers (meteorology, soil,  streamflow and all possible variables)
 drivers <- read.csv(paste0(dir, "data/drivers.csv"))
 drivers$date <- as.Date(drivers$date)
@@ -12,7 +13,9 @@ target$date <- as.Date(target$date)
 
 #merge all and add julian day and dummy
 data <- merge(drivers, target, by="date")
-data$yday <- yday(data$date)
+#data$yday <- yday(data$date)
+data$cyday <- cos(yday(data$date)/365)
+#data$syday <- sin(yday(data$date)/365)
 data$random <- runif(nrow(data))
 
 #ML Analysis
@@ -87,7 +90,7 @@ abline(0,1, col="red")
 # 3. Repeat, but selecting data only with high importance
 # select variable greater importance than Julian day
 data <- data[c("swt", "v", "light","t", "st7", "st28", 
-               "sm100","sm255", "fdom", "date")]
+               "sm100","sm255", "doc_gwlf","fdom", "date")]
 
 train_perc <- 0.8 #percentage for training 
 m <- 1:(dim(data)[1]*train_perc)

@@ -1,12 +1,8 @@
 library(lubridate); library(dplyr)
 
-#driver used in Feeagh
-#pr, t2m , Q, tmax, tmin, pr_2, t2m_2, ps, 
-#soil temp 10cm, pev, evaporation, soil moisture deficit mm/day,
-#global radiation
-
 #soil and meteo data from Open Meteo
-dir <- "~/Documents/intoDBP/training_fdom/"
+case_study <- "sau"
+dir <- paste0("~/Documents/intoDBP/training_fdom/",case_study, "/")
 soil_meteo <- read.csv(paste0(dir, "download/meteo-soil_data.csv"))
 soil_meteo$date <- as.Date(soil_meteo$date)
 soil_meteo_temp <- aggregate(. ~ date, data=soil_meteo, FUN = function(x) c(mean = mean(x, na.rm = TRUE)))
@@ -23,7 +19,7 @@ write.csv(soil_meteo, paste0(dir, "data/meteo-soil_daily_data.csv"),
           row.names = F, quote = F)
 
 #streamflow data from ATL
-stream <- read.csv(paste0(dir, "data/discharge_obs.csv"), header = F)
+stream <- read.csv(paste0(dir, "data/river.csv"), header = F)
 stream <- data.frame(date=as.Date(stream$V1, "%m/%d/%Y"), q=stream$V2)
 
 #Load lake data (GLM output)
@@ -39,5 +35,12 @@ lake_data <- data.frame(date=as.Date(glm_out$time),
 #merge all possible drivers
 drivers <- merge(stream, lake_data, by="date")
 drivers <- merge(drivers, soil_meteo, by="date")
+
+#load GWLF: discharge and DOC
+GWLF <- read.csv(paste0(dir, "data/GWLF.csv"), header = T)
+GWLF <- GWLF[,2:ncol(GWLF)]
+colnames(GWLF) <- c("date", "q_gwlf", "doc_gwlf")
+GWLF$date <- as.Date(GWLF$date, "%m/%d/%Y")
+drivers <- merge(drivers, GWLF, by="date")
 
 write.csv(drivers, paste0(dir,"data/drivers.csv"), row.names = F, quote = F)
