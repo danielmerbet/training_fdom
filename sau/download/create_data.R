@@ -8,12 +8,18 @@ soil_meteo$date <- as.Date(soil_meteo$date)
 soil_meteo_temp <- aggregate(. ~ date, data=soil_meteo, FUN = function(x) c(mean = mean(x, na.rm = TRUE)))
 soil_meteo_temp$precipitation <- NULL
 rain_temp <- aggregate(precipitation ~ date, data=soil_meteo, FUN = function(x) c(sum = sum(x, na.rm = TRUE)))
+soil_meteo_temp$et0_fao_evapotranspiration <- NULL
+etp_temp <- aggregate(et0_fao_evapotranspiration ~ date, data=soil_meteo, FUN = function(x) c(sum = sum(x, na.rm = TRUE)))
+
 soil_meteo <- merge(soil_meteo_temp, rain_temp, by="date")
-names(soil_meteo) <- c("date","t", "rh", "sp", "cc", "pev",
-                       "ws","st7", "st28", "st100","st255",
-                       "sm7", "sm28", "sm100","sm255","tp")
+soil_meteo <- merge(soil_meteo, etp_temp, by="date")
+names(soil_meteo) <- c("date","t", "rh", "sp", "cc", "ws",
+                       "sr", "st7", "st28", "st100","st255",
+                       "sm7", "sm28", "sm100","sm255",
+                       "tp", "pev")
 soil_meteo_temp <- NULL
 rain_temp <- NULL
+etp_temp <- NULL
 
 write.csv(soil_meteo, paste0(dir, "data/meteo-soil_daily_data.csv"), 
           row.names = F, quote = F)
