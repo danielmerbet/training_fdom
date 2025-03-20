@@ -7,15 +7,13 @@ drivers <- read.csv(paste0(dir, "data/drivers.csv"))
 drivers$date <- as.Date(drivers$date)
 
 #load target variables
-tvar <- "fdom"
+tvar <- "fdom" #"doc"#"fdom"
 target <- read.csv(paste0(dir ,"data/",tvar,".csv"))
 target$date <- as.Date(target$date)
 
 #merge all and add julian day and dummy
 data <- merge(drivers, target, by="date")
-#data$yday <- yday(data$date)
-data$cyday <- cos(yday(data$date)/365)
-#data$syday <- sin(yday(data$date)/365)
+data$cyday <- cos(yday(data$date)*pi/180)
 data$random <- runif(nrow(data))
 
 #ML Analysis
@@ -42,7 +40,7 @@ importance_random/sum(importance_random)*100
 plot(data$date, data[tvar][,1], xlab="Dates", ylab="fDOM (QSU)")
 points(data$date, predRF, col="darkgrey")
 
-plot(data[tvar][,1],predRF, xlab="Obs", ylab="Sim", ylim=c(5,52),xlim=c(5,52))
+plot(data[tvar][,1],predRF, xlab="Obs", ylab="Sim") #ylim=c(5,52),xlim=c(5,52)
 abline(0,1, col="red")
 
 #2. TRAINING AND TESTING WITH NON AUTOCORRELATED SAMPLES

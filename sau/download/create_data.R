@@ -19,8 +19,8 @@ write.csv(soil_meteo, paste0(dir, "data/meteo-soil_daily_data.csv"),
           row.names = F, quote = F)
 
 #streamflow data from ATL
-stream <- read.csv(paste0(dir, "data/river.csv"), header = F)
-stream <- data.frame(date=as.Date(stream$V1, "%m/%d/%Y"), q=stream$V2)
+#stream <- read.csv(paste0(dir, "data/river.csv"), header = F)
+#stream <- data.frame(date=as.Date(stream$V1, "%m/%d/%Y"), q=stream$V2)
 
 #Load lake data (GLM output)
 glm_out <- read.csv(paste0(dir, "data/lake.csv"))
@@ -29,12 +29,13 @@ lake_data <- data.frame(date=as.Date(glm_out$time),
                         v=glm_out$Volume,
                         lh=glm_out$Daily.Qe,
                         sh=glm_out$Daily.Qh,
-                        light=glm_out$Light,
+                        #light=glm_out$Light,
                         strat=glm_out$Max.dT.dz)
 
 #merge all possible drivers
-drivers <- merge(stream, lake_data, by="date")
-drivers <- merge(drivers, soil_meteo, by="date")
+#drivers <- merge(stream, lake_data, by="date")
+#drivers <- merge(drivers, soil_meteo, by="date")
+drivers <- merge(lake_data, soil_meteo, by="date")
 
 #load GWLF: discharge and DOC
 GWLF <- read.csv(paste0(dir, "data/GWLF.csv"), header = T)
@@ -43,4 +44,12 @@ colnames(GWLF) <- c("date", "q_gwlf", "doc_gwlf")
 GWLF$date <- as.Date(GWLF$date, "%m/%d/%Y")
 drivers <- merge(drivers, GWLF, by="date")
 
+#load DOC
+#DOC <- read.csv("sau/data/DOC_SAU_C1.csv")
+#DOC <- data.frame(date=DOC$Fecha, depth=DOC$Depth, doc=DOC$Valor)
+#DOC <- subset(DOC, depth==5)
+#DOC <- subset(DOC, depth >= 0 & depth <= 5)
+#DOC$date <- as.Date(DOC$date)
+
+#drivers <- merge(drivers, DOC, by="date")
 write.csv(drivers, paste0(dir,"data/drivers.csv"), row.names = F, quote = F)

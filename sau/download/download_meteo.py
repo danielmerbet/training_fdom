@@ -17,6 +17,7 @@ from retry_requests import retry
 
 
 #Streamflow data from ACA
+case_study = "sau"
 homedir ="/home/dmercado/Documents/intoDBP/training_fdom/"
 os.chdir(homedir)
 
@@ -47,7 +48,13 @@ params = {
 	"longitude": lon,
 	"start_date": start_date.date().strftime('%Y-%m-%d'),
 	"end_date": end_date.date().strftime('%Y-%m-%d'),
-	"hourly": ["temperature_2m", "relative_humidity_2m", "precipitation", "surface_pressure", "cloud_cover", "et0_fao_evapotranspiration", "wind_speed_10m", "soil_temperature_0_to_7cm", "soil_temperature_7_to_28cm", "soil_temperature_28_to_100cm", "soil_temperature_100_to_255cm", "soil_moisture_0_to_7cm", "soil_moisture_7_to_28cm", "soil_moisture_28_to_100cm", "soil_moisture_100_to_255cm"],
+	"hourly": ["temperature_2m", "relative_humidity_2m",
+	"precipitation", "surface_pressure", "cloud_cover",
+	"et0_fao_evapotranspiration", "wind_speed_10m", "shortwave_radiation", 
+	"soil_temperature_0_to_7cm", "soil_temperature_7_to_28cm", 
+	"soil_temperature_28_to_100cm", "soil_temperature_100_to_255cm", 
+	"soil_moisture_0_to_7cm", "soil_moisture_7_to_28cm", 
+	"soil_moisture_28_to_100cm", "soil_moisture_100_to_255cm"],
 	"models": "era5"
 }
 responses = openmeteo.weather_api(url, params=params)
@@ -68,6 +75,7 @@ hourly_surface_pressure = hourly.Variables(3).ValuesAsNumpy()
 hourly_cloud_cover = hourly.Variables(4).ValuesAsNumpy()
 hourly_et0_fao_evapotranspiration = hourly.Variables(5).ValuesAsNumpy()
 hourly_wind_speed_10m = hourly.Variables(6).ValuesAsNumpy()
+hourly_shortwave_radiation = hourly.Variables(6).ValuesAsNumpy()
 hourly_soil_temperature_0_to_7cm = hourly.Variables(7).ValuesAsNumpy()
 hourly_soil_temperature_7_to_28cm = hourly.Variables(8).ValuesAsNumpy()
 hourly_soil_temperature_28_to_100cm = hourly.Variables(9).ValuesAsNumpy()
@@ -90,6 +98,7 @@ hourly_data["surface_pressure"] = hourly_surface_pressure
 hourly_data["cloud_cover"] = hourly_cloud_cover
 hourly_data["et0_fao_evapotranspiration"] = hourly_et0_fao_evapotranspiration
 hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
+hourly_data["shortwave_radiation"] = hourly_shortwave_radiation
 hourly_data["soil_temperature_0_to_7cm"] = hourly_soil_temperature_0_to_7cm
 hourly_data["soil_temperature_7_to_28cm"] = hourly_soil_temperature_7_to_28cm
 hourly_data["soil_temperature_28_to_100cm"] = hourly_soil_temperature_28_to_100cm
@@ -102,5 +111,5 @@ hourly_data["soil_moisture_100_to_255cm"] = hourly_soil_moisture_100_to_255cm
 hourly_dataframe = pd.DataFrame(data = hourly_data)
 print(hourly_dataframe)
 
-hourly_dataframe.to_csv('download/meteo-soil_data.csv', index=False)
+hourly_dataframe.to_csv(case_study+'/download/meteo-soil_data.csv', index=False)
 
