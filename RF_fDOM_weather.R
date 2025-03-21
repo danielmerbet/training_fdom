@@ -1,5 +1,6 @@
 library(lubridate)
 
+set.seed(123)
 case_study <- "sau"
 dir <- paste0("~/Documents/intoDBP/training_fdom/",case_study, "/")
 #load drivers (meteorology, soil,  streamflow and all possible variables)
@@ -16,9 +17,19 @@ data <- merge(drivers, target, by="date")
 data$cyday <- cos(yday(data$date)*pi/180)
 data$random <- runif(nrow(data))
 
+data <- data[-c(25,26)]
+
+nse <- function(sim, obs) {
+  numerator <- sum((obs - sim)^2)
+  denominator <- sum((obs - mean(obs))^2)
+  nse <- 1 - (numerator / denominator)
+  return(nse)
+}
+
 #ML Analysis
 ###############################################################
 #Random forest
+
 library(randomForest)
 save_rsq <- c()
 save_rmse <- c()
@@ -34,7 +45,8 @@ predRF<- predict(RFfit) # without data, give the prediction with OOB samples
 rsqOOB = round((cor(predRF, data[tvar]))^2,2) ; rsqOOB
 rmseOOB <- round(sqrt(mean((data[tvar][,1] - predRF)^2)), 2); rmseOOB
 importance_random <- importance(RFfit); importance_random
-importance_random/sum(importance_random)*100
+importance_perc <- importance_random/sum(importance_random)*100
+importance_perc
 
 #stats are quite good, it seems promising
 plot(data$date, data[tvar][,1], xlab="Dates", ylab="fDOM (QSU)")
@@ -48,10 +60,13 @@ abline(0,1, col="red")
 #but, RF assumes observations are not autocorrelated
 #For time series, this assumption might not hold
 #Let's train and test with samples taken from different time ranges
-train_perc <- 0.8 #percentage for training 
+train_perc <- 0.15 #percentage for training 
 m <- 1:(dim(data)[1]*train_perc)
-traindata <- data[m,]
-testdata <- data[-m,]
+best <- 101
+training_number <- round(dim(data)[1]*train_perc)
+m <- (1+best):(1+best+training_number)
+traindata <- data[-m,]
+testdata <- data[m,]
 
 #start training 
 formula <- as.formula(paste(tvar, "~ . - date"))
@@ -68,6 +83,7 @@ maeOOB <- mean(abs(traindata[tvar][,1] - predRF_OOB));maeOOB
 predRF<- predict(RFfit, testdata) # without data, give the prediction with OOB samples
 rsq_test <- round((cor(predRF, testdata[tvar]))^2,2) ; rsq_test
 rmse_test <- round(sqrt(mean((testdata[tvar][,1] - predRF)^2)), 2); rmse_test
+nse_test <- round(nse(testdata[tvar][,1], predRF),2); nse_test
 save_rsq <- c(save_rsq, rsq_test)
 save_rmse <- c(save_rmse, rmse_test)
 maeOOB <- mean(abs(testdata[tvar][,1] - predRF));maeOOB
@@ -87,8 +103,10 @@ abline(0,1, col="red")
 
 # 3. Repeat, but selecting data only with high importance
 # select variable greater importance than Julian day
-data <- data[c("swt", "v", "light","t", "st7", "st28", 
-               "sm100","sm255", "doc_gwlf","fdom", "date")]
+
+data
+data <- data[c("v","st255", "sm100","sm255", "doc_gwlf","cyday",
+               "fdom", "date")]
 
 train_perc <- 0.8 #percentage for training 
 m <- 1:(dim(data)[1]*train_perc)
