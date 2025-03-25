@@ -82,7 +82,6 @@ plot(testdata[tvar][,1],predRF, xlab="Obs", ylab="Sim", ylim=c(5,52),xlim=c(5,52
 abline(0,1, col="red")
 
 ####Plotting nude purity in bars
-
 name_variable = names(data)[!names(data) %in% c("fdom", "date")]
 
 png(paste0(dir, "output/NudePurityBars.png"), width = 800, height = 600, bg = NA)
@@ -102,3 +101,8 @@ barplot(
   ylab = "Predictor"
 )
 dev.off()
+
+barplot_table <- data.frame(name_variable=name_variable, 
+                            importance_perc=importance_perc)
+
+write.csv(barplot_table, paste0(dir, "output/barplot_table.csv"), quote = F, row.names = F)

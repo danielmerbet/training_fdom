@@ -92,12 +92,12 @@ plots <- lapply(vars, function(var) {
     geom_point() +
     geom_smooth(span = 0.2) +
     theme_bw() +
-    labs(x = var, y = "Average fDOM predicted")
+    labs(x = var, y = "Avg. fDOM predicted")
 })
 
 # Save to PDF
-pdf("partial_dependence_plots.pdf", width = 10, height = 6)
-grid.arrange(grobs = plots, ncol = 3, nrow = 2)
+pdf(paste0(dir, "output/partial_dependence_plots.pdf"), width = 7, height = 7)
+grid.arrange(grobs = plots, ncol = 2, nrow = 3)
 dev.off()
 
 
