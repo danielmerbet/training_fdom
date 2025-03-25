@@ -1,4 +1,5 @@
 library(lubridate); library(pdp)
+library(gridExtra) # for arranging multiple plots
 
 set.seed(123)
 case_study <- "sau"
@@ -18,7 +19,7 @@ data$cyday <- cos(yday(data$date)*pi/180)
 data$random <- runif(nrow(data))
 
 #select best parameters
-data <- data[,c("v", "st255","sm100", "sm255","doc_gwlf", "cyday", "fdom", "date")]
+#data <- data[,c("v", "st255","sm100", "sm255","doc_gwlf", "cyday", "fdom", "date")]
 
 nse <- function(sim, obs) {
   numerator <- sum((obs - sim)^2)
@@ -47,24 +48,24 @@ RFfit <- randomForest(formula, data = traindata, ntree = 1000)
 #plot(RFfit)
 
 #check resulting stats with OOB data
-set.seed(123)
-predRF_OOB<- predict(RFfit) # without data, give the prediction with OOB samples
-rsqOOB <- round((cor(predRF_OOB, traindata[tvar]))^2,2) ; rsqOOB
-rmseOOB <- round(sqrt(mean((traindata[tvar][,1] - predRF_OOB)^2)), 2); rmseOOB
-maeOOB <- mean(abs(traindata[tvar][,1] - predRF_OOB));maeOOB
-importance_random <- importance(RFfit); importance_random
-importance_perc <- importance_random/sum(importance_random)*100
-importance_perc
+#set.seed(123)
+#predRF_OOB<- predict(RFfit) # without data, give the prediction with OOB samples
+#rsqOOB <- round((cor(predRF_OOB, traindata[tvar]))^2,2) ; rsqOOB
+#rmseOOB <- round(sqrt(mean((traindata[tvar][,1] - predRF_OOB)^2)), 2); rmseOOB
+#maeOOB <- mean(abs(traindata[tvar][,1] - predRF_OOB));maeOOB
+#importance_random <- importance(RFfit); importance_random
+#importance_perc <- importance_random/sum(importance_random)*100
+#importance_perc
 
 #testing: check with data not used in training 
-set.seed(123)
-predRF<- predict(RFfit, testdata) # without data, give the prediction with OOB samples
-rsq_test <- round((cor(predRF, testdata[tvar]))^2,2) ; rsq_test
-rmse_test <- round(sqrt(mean((testdata[tvar][,1] - predRF)^2)), 2); rmse_test
-nse_test <- round(nse(testdata[tvar][,1], predRF),2); nse_test
-importance_random <- importance(RFfit); importance_random
-importance_perc <- importance_random/sum(importance_random)*100
-importance_perc
+#set.seed(123)
+#predRF<- predict(RFfit, testdata) # without data, give the prediction with OOB samples
+#rsq_test <- round((cor(predRF, testdata[tvar]))^2,2) ; rsq_test
+#rmse_test <- round(sqrt(mean((testdata[tvar][,1] - predRF)^2)), 2); rmse_test
+#nse_test <- round(nse(testdata[tvar][,1], predRF),2); nse_test
+#importance_random <- importance(RFfit); importance_random
+#importance_perc <- importance_random/sum(importance_random)*100
+#importance_perc
 
 #Partial dependence plots
 var <- "v"
@@ -80,11 +81,23 @@ partial(RFfit, pred.var = var, plot = T, plot.engine = "ggplot2", rug=T)
 var <- "cyday"
 partial(RFfit, pred.var = var, plot = T, plot.engine = "ggplot2", rug=T)
 
-p1<-partial(RFfit, pred.var = var)
-ggplot(p1, aes(x = sm255, y = yhat))+
-  # geom_point() + 
-  geom_smooth(span = 0.2) + 
-  theme_bw() + 
-  labs(x = var, y = "fDOM")
+#ggplot nice
+#Partial dependence plots
+# Define the variables
+vars <- c("v", "st255", "sm100", "sm255", "doc_gwlf", "cyday")
+
+# Generate the plots
+plots <- lapply(vars, function(var) {
+  ggplot(partial(RFfit, pred.var = var), aes_string(x = var, y = "yhat")) +
+    geom_point() +
+    geom_smooth(span = 0.2) +
+    theme_bw() +
+    labs(x = var, y = "Average fDOM predicted")
+})
+
+# Save to PDF
+pdf("partial_dependence_plots.pdf", width = 10, height = 6)
+grid.arrange(grobs = plots, ncol = 3, nrow = 2)
+dev.off()
 
 
