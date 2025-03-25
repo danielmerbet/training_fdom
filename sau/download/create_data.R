@@ -51,21 +51,21 @@ GWLF$date <- as.Date(GWLF$date, "%m/%d/%Y")
 drivers <- merge(drivers, GWLF, by="date")
 
 #load INCA-C:discharge DOC
-INCA <- read.table(paste0(dir,"data/inca_out_C2_ERA5.txt"))
-names(INCA) <- c("date", "q_inca", "doc_inca")
-INCA$date <- as.Date(INCA$date, "%d/%m/%Y")
+#INCA <- read.table(paste0(dir,"data/inca_out_C2_ERA5.txt"))
+#names(INCA) <- c("date", "q_inca", "doc_inca")
+#INCA$date <- as.Date(INCA$date, "%d/%m/%Y")
 
 plot(GWLF$date,GWLF$doc_gwlf, type="l")
-lines(INCA$date,INCA$doc_inca, col="red")
+#lines(INCA$date,INCA$doc_inca, col="red")
 
 #merge
-drivers <- merge(drivers, INCA, by="date")
+#drivers <- merge(drivers, INCA, by="date")
 
 #drivers <- merge(drivers, DOC, by="date")
 write.csv(drivers, paste0(dir,"data/drivers.csv"), row.names = F, quote = F)
 
 #load DOC
-DOC <- read.csv("sau/data/DOC_SAU_C1.csv")
+DOC <- read.csv(paste0(dir, "data/DOC_SAU_C1.csv"))
 DOC <- data.frame(date=DOC$Fecha, depth=DOC$Depth, doc=DOC$Valor)
 #DOC <- subset(DOC, depth==5)
 DOC <- subset(DOC, depth >= 0 & depth <= 5)
