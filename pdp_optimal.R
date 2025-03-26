@@ -32,7 +32,7 @@ nse <- function(sim, obs) {
 ###############################################################
 #Random forest
 library(randomForest)
-i <- 437 #best fitting using NSE
+i <- 433 #best fitting using NSE
 train_perc <- 0.85 #percentage for training 
 training_number <- round(dim(data)[1]*train_perc)
 total_front <- dim(data)[1]-training_number
@@ -92,6 +92,13 @@ plots <- lapply(vars, function(var) {
     geom_point() +
     geom_smooth(span = 0.2) +
     theme_bw() +
+    #theme_minimal() +  # Minimal theme (removes grey background)
+    theme(
+      panel.border = element_blank(),  # Remove the black box around the plot
+      panel.grid.major = element_blank(),  # Remove major gridlines
+      panel.grid.minor = element_blank()   # Remove minor gridlines
+    ) +
+    theme(axis.line = element_line(colour = "black"))+
     labs(x = var, y = "Avg. fDOM predicted")
 })
 

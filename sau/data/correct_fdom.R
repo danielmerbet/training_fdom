@@ -64,8 +64,8 @@ plot(data$swt, data$fdom,
 data$fdom_cor <- (-1)*(data$swt-22)*slope_effect + data$fdom
 points(data$swt, data$fdom_cor, col="red")
      
-plot(data$fdom, ylim=c(0,80))
-points(data$fdom_cor, col="red")
+plot(data$date, data$fdom, ylim=c(0,80))
+points(data$date, data$fdom_cor, col="red")
 
 data <- data[!data$fdom_cor<0,]
 

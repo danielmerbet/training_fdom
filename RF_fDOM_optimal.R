@@ -28,7 +28,7 @@ nse <- function(sim, obs) {
 ###############################################################
 #Random forest
 library(randomForest)
-i <- 437 #best fitting using NSE
+i <- 433 #best fitting using NSE
 train_perc <- 0.85 #percentage for training 
 training_number <- round(dim(data)[1]*train_perc)
 total_front <- dim(data)[1]-training_number
@@ -63,19 +63,22 @@ importance_random <- importance(RFfit); importance_random
 importance_perc <- importance_random/sum(importance_random)*100
 importance_perc
 
-png(paste0(dir, "output/fig4_opt.png"), width = 800, height = 600, bg=NA)
+#png(paste0(dir, "output/fig4_opt.png"), width = 800, height = 600, bg=NA)
 #now the stats are NOT as good, but they are REAL (not affected by autocorrelation)
-plot(data$date, data[tvar][,1], ylab="fDOM (QSU)", xlab = "", type="l")
-points(data$date, data[tvar][,1], ylab="fDOM (QSU)", xlab = "", xaxt='n')
-points(traindata$date, predRF_OOB, col="blue", pch = 19, cex=0.5)
-
-#plot(testdata$date, testdata[tvar][,1], ylim=c(5,52), xlab="Dates", ylab="fDOM (QSU)")
-points(testdata$date, predRF, col="red", pch = 19, cex=0.5)
-#abline(v = as.numeric(as.Date(testdata$date[1])), col="darkgrey", lwd=2, lty=2)
+#plot(data$date, data[tvar][,1], ylab="fDOM (QSU)", xlab = "", type="l")
+#points(data$date, data[tvar][,1], ylab="fDOM (QSU)", xlab = "", xaxt='n')
+pdf(paste0(dir, "output/fig4_opt.pdf"), width = 8, height = 6)
+par(font.lab = 2) # Makes axis labels bold
+plot(data$date, data[tvar][,1], ylab="fDOM (QSU)", xlab = "", xaxt="n", bty="n")
+axis.Date(1, at = seq(as.Date(paste0(year(min(data$date)),"-", "01-01")), 
+                      as.Date(paste0(year(max(data$date)),"-", "12-31")),
+                      by = "6 months"), format = "%m-%Y")
+points(traindata$date, predRF_OOB, col="steelblue", pch = 19, cex=0.5)
+points(testdata$date, predRF, col="brown", pch = 19, cex=0.5)
 title(main="Optimal training period")
 text(x = min(traindata$date), y = max(data[tvar][,1]-10),
-     labels = paste0("R² = ", rsq_test, "\nNSE = ", nse_test, "\nRMSE = ", rmse_test), pos = 4, col = "black")
-
+     labels = paste0("R² = ", rsq_test, "\nNSE = ", nse_test, "\nRMSE = ", rmse_test), 
+     pos = 4, col = "black")
 dev.off()
 
 plot(testdata[tvar][,1],predRF, xlab="Obs", ylab="Sim", ylim=c(5,52),xlim=c(5,52))
