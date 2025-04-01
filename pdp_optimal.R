@@ -99,6 +99,7 @@ plots <- lapply(vars, function(var) {
       panel.grid.minor = element_blank()   # Remove minor gridlines
     ) +
     theme(axis.line = element_line(colour = "black"))+
+    ylim(12,26)+
     labs(x = var, y = "Avg. fDOM predicted")
 })
 

@@ -6,6 +6,7 @@ dir <- paste0("~/Documents/intoDBP/training_fdom/",case_study, "/")
 #load drivers (meteorology, soil,  streamflow and all possible variables)
 drivers <- read.csv(paste0(dir, "data/drivers.csv"))
 drivers$date <- as.Date(drivers$date)
+#drivers <- drivers[,c(1:11, 13:24)]
 
 #load target variables
 tvar <- "fdom"
@@ -16,6 +17,7 @@ target$date <- as.Date(target$date)
 data <- merge(drivers, target, by="date")
 data$cyday <- cos(yday(data$date)*pi/180)
 data$random <- runif(nrow(data))
+
 
 nse <- function(sim, obs) {
   numerator <- sum((obs - sim)^2)
